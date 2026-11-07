@@ -327,7 +327,7 @@ targets spelled through a variable."
 
 ;;; Transient
 
-;;;###autoload
+;;;###autoload (autoload 'makel-menu "makel" nil t)
 (transient-define-prefix makel-menu ()
   "Make commands."
   [["Make"

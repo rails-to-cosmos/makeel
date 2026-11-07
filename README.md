@@ -40,7 +40,7 @@ failed-process completion, and next-error navigation to a source file.
 
 ## Prior art
 
-[makefile-executor](https://github.com/Olivia5k/makefile-executor) also
+`makefile-executor` also
 provides Makefile target selection. makel adds global status tracking and
 switching between output buffers. The unrelated
 [DamienCassou/makel](https://github.com/DamienCassou/makel) is a Makefile
