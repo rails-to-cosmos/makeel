@@ -1,1 +1,1 @@
-(makel :fetcher github :repo "rails-to-cosmos/makel")
+(makeel :fetcher github :repo "rails-to-cosmos/makeel")

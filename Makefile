@@ -1,5 +1,5 @@
 EMACS   ?= emacs
-PACKAGE := makel.el
+PACKAGE := makeel.el
 
 .PHONY: all check lint compile clean help
 
@@ -41,4 +41,4 @@ ELPA_TOOLS ?= $(abspath ../elpa)
 
 .PHONY: test
 test:
-	$(EMACS) -Q --batch -L . -l test/test-makel.el -f ert-run-tests-batch-and-exit
+	$(EMACS) -Q --batch -L . -l test/test-makeel.el -f ert-run-tests-batch-and-exit

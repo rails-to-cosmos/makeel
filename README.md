@@ -1,4 +1,4 @@
-# makel
+# makeel
 
 Pick a target from the nearest parent Makefile, run it in an interactive
 compilation buffer, and switch between tracked runs.
@@ -7,15 +7,15 @@ Requires Emacs 29.1 or later, Transient 0.4 or later, and GNU Make on PATH.
 
 ## Usage
 
-Run M-x makel-menu, or bind it:
+Run M-x makeel-menu, or bind it:
 
 ```elisp
-(require 'makel)
-(global-set-key (kbd "C-x y m") #'makel-menu)
-(makel-mode-line-mode 1) ; optional global status tracking
+(require 'makeel)
+(global-set-key (kbd "C-x y m") #'makeel-menu)
+(makeel-mode-line-mode 1) ; optional global status tracking
 ```
 
-The menu offers `makel-run` and `makel-switch-buffer`. During execution,
+The menu offers `makeel-run` and `makeel-switch-buffer`. During execution,
 type responses at the process prompt; C-c C-c interrupts the process and
 C-c C-k kills it. Password prompts suppress input echo through comint.
 After exit, the buffer becomes read-only: q closes its window, and
@@ -23,7 +23,7 @@ compilation navigation, including next-error, remains available.
 
 Mode-line entries show running, successful, and failed targets. Mouse-1
 opens the output; mouse-3 removes the buffer after confirmation.
-`makel-mode-line-cleanup-delay` controls how long completed entries remain
+`makeel-mode-line-cleanup-delay` controls how long completed entries remain
 (default 60 seconds; nil keeps them indefinitely).
 
 Execution uses a PTY through compilation/comint and supports ANSI colors.
@@ -41,7 +41,7 @@ failed-process completion, and next-error navigation to a source file.
 ## Prior art
 
 `makefile-executor` also
-provides Makefile target selection. makel adds global status tracking and
+provides Makefile target selection. makeel adds global status tracking and
 switching between output buffers. The unrelated
 [DamienCassou/makel](https://github.com/DamienCassou/makel) is a Makefile
 lint harness.

@@ -1,37 +1,37 @@
-;;; test-makel.el --- makel tests -*- lexical-binding: t; -*-
+;;; test-makeel.el --- makeel tests -*- lexical-binding: t; -*-
 (require 'ert)
-(require 'makel)
+(require 'makeel)
 
-(defconst makel-test--fixture
+(defconst makeel-test--fixture
   (expand-file-name "Makefile.fixture" (file-name-directory load-file-name)))
 
-(ert-deftest makel-targets ()
-  (should (equal (makel--targets makel-test--fixture)
+(ert-deftest makeel-targets ()
+  (should (equal (makeel--targets makeel-test--fixture)
                  '("all" "last" "major" "minor" "patch"))))
 
-(ert-deftest makel-target-at-eof ()
-  (let ((file (make-temp-file "makel")))
+(ert-deftest makeel-target-at-eof ()
+  (let ((file (make-temp-file "makeel")))
     (unwind-protect
         (progn
           (write-region "target:" nil file nil 'silent)
-          (should (equal (makel--targets file) '("target"))))
+          (should (equal (makeel--targets file) '("target"))))
       (delete-file file))))
 
-(ert-deftest makel-mode-line-toggle ()
+(ert-deftest makeel-mode-line-toggle ()
   (let ((global-mode-string nil))
     (unwind-protect
         (progn
-          (makel-mode-line-mode 1)
-          (makel-mode-line-mode 1)
+          (makeel-mode-line-mode 1)
+          (makeel-mode-line-mode 1)
           (should (= 1 (length global-mode-string)))
-          (makel-mode-line-mode -1)
+          (makeel-mode-line-mode -1)
           (should-not global-mode-string))
-      (makel-mode-line-mode -1))))
+      (makeel-mode-line-mode -1))))
 
-(ert-deftest makel-interactive-compilation ()
-  (let* ((dir (make-temp-file "makel-project" t))
-         (makel-mode-line-cleanup-delay nil)
-         (makel--buffers nil)
+(ert-deftest makeel-interactive-compilation ()
+  (let* ((dir (make-temp-file "makeel-project" t))
+         (makeel-mode-line-cleanup-delay nil)
+         (makeel--buffers nil)
          (buf nil))
     (unwind-protect
         (progn
@@ -41,7 +41,7 @@
 two
 three
 " nil (expand-file-name "sample.c" dir) nil 'silent)
-          (setq buf (makel--spawn "*makel-test*" "ask" "test" (file-name-as-directory dir)))
+          (setq buf (makeel--spawn "*makeel-test*" "ask" "test" (file-name-as-directory dir)))
           (with-current-buffer buf
             (let ((proc (get-buffer-process buf))
                   (deadline (+ (float-time) 10)))
@@ -50,7 +50,7 @@ three
               (while (and (process-live-p proc) (< (float-time) deadline))
                 (accept-process-output proc 0.1))
               (should-not (process-live-p proc))
-              (should (equal makel--status '(fail . 2)))
+              (should (equal makeel--status '(fail . 2)))
               (should buffer-read-only)
               (should (eq (lookup-key (current-local-map) "q") #'quit-window))
               (should (eq next-error-function #'compilation-next-error-function))
