@@ -1,0 +1,14 @@
+name: check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        emacs: ['29.4', '30.2', '31.1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs }}
+      - run: make check

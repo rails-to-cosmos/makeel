@@ -1,0 +1,11 @@
+VERSION := 1
+OTHER ::= 2
+.PHONY: major minor patch
+%.o: %.c
+$(GENERATED): input
+major minor patch:
+all: major
+all: minor
+# ignored: comment
+	@echo recipe: ignored
+last:
