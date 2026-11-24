@@ -68,3 +68,31 @@ three
       (when-let* ((source (get-file-buffer (expand-file-name "sample.c" dir))))
         (kill-buffer source))
       (delete-directory dir t))))
+
+(ert-deftest makeel-prefix-runs-terminal ()
+  (let* ((dir (make-temp-file "makeel-terminal" t))
+         (default-directory (file-name-as-directory dir))
+         (makeel-mode-line-cleanup-delay nil)
+         (makeel--buffers nil)
+         buf)
+    (unwind-protect
+        (progn
+          (write-region "ask:\n\t@test -t 0 && test \"$$TERM\" != dumb && read answer && test \"$$answer\" = hello\n"
+                        nil "Makefile" nil 'silent)
+          (let ((current-prefix-arg '(4)))
+            (cl-letf (((symbol-function 'completing-read) (lambda (&rest _) "ask")))
+              (setq buf (call-interactively #'makeel-run))))
+          (with-current-buffer buf
+            (should (derived-mode-p 'term-mode))
+            (should (term-in-char-mode))
+            (should (memq buf makeel--buffers))
+            (let ((proc (get-buffer-process buf))
+                  (deadline (+ (float-time) 10)))
+              (process-send-string proc "hello\n")
+              (while (and (process-live-p proc) (< (float-time) deadline))
+                (accept-process-output proc 0.1))
+              (should (eq makeel--status 'ok))
+              (should (eq (key-binding "q") #'quit-window)))))
+      (when (buffer-live-p buf)
+        (let ((kill-buffer-query-functions nil)) (kill-buffer buf)))
+      (delete-directory dir t))))

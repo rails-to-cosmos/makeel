@@ -3,7 +3,7 @@
 ;; Copyright (C) 2026 Dmitry Akatov
 ;; Author: Dmitry Akatov <dmitry.akatov@protonmail.com>
 ;; URL: https://github.com/rails-to-cosmos/makeel
-;; Package-Version: 0.1.0
+;; Package-Version: 0.2.0
 ;; Package-Requires: ((emacs "29.1") (transient "0.4"))
 ;; Keywords: tools, processes
 
@@ -19,6 +19,7 @@
 (require 'comint)
 (require 'ansi-color)
 (require 'transient)
+(require 'term)
 
 ;;; Per-buffer state
 
@@ -232,27 +233,40 @@ Inherits compilation navigation bindings.")
 
 ;;; Spawn
 
-(defun makeel--spawn (buffer-name target project dir)
-  "Run TARGET for PROJECT in DIR, using BUFFER-NAME for output."
+(defun makeel--start-terminal (buffer-name target)
+  "Run make for TARGET in a character-mode terminal named BUFFER-NAME."
+  (let ((buf (get-buffer-create buffer-name)))
+    (pop-to-buffer buf)
+    (term-mode)
+    (term-exec buf "make" "make" nil (list "--" target))
+    (term-char-mode)
+    buf))
+
+(defun makeel--spawn (buffer-name target project dir &optional terminal)
+  "Run TARGET for PROJECT in DIR, using BUFFER-NAME for output.
+With TERMINAL, run in a character-mode terminal."
   (when-let* ((old (get-buffer buffer-name)))
     (let ((kill-buffer-query-functions nil))
       (kill-buffer old)))
   (let* ((default-directory dir)
          (process-connection-type t)
-         (buf (compilation-start
-               (concat "make -- " (shell-quote-argument target)) t
-               (lambda (_mode) buffer-name))))
+         (buf (if terminal
+                  (makeel--start-terminal buffer-name target)
+                (compilation-start
+                 (concat "make -- " (shell-quote-argument target)) t
+                 (lambda (_mode) buffer-name)))))
     (with-current-buffer buf
       (setq-local makeel--target target
                   makeel--project project
                   makeel--status 'running
                   makeel--start-time (current-time))
       (setq header-line-format (makeel--header "C-c C-c interrupt"))
-      (local-set-key (kbd "C-c C-k") #'makeel-kill-process)
-      (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter nil t)
-      (add-hook 'comint-output-filter-functions #'ansi-color-process-output nil t)
-      (add-hook 'comint-output-filter-functions
-                #'comint-watch-for-password-prompt nil t)
+      (unless terminal
+        (local-set-key (kbd "C-c C-k") #'makeel-kill-process)
+        (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter nil t)
+        (add-hook 'comint-output-filter-functions #'ansi-color-process-output nil t)
+        (add-hook 'comint-output-filter-functions
+                  #'comint-watch-for-password-prompt nil t))
       (add-hook 'kill-buffer-hook #'makeel--unregister nil t)
       (makeel--register buf)
       (let* ((proc (get-buffer-process buf))
@@ -291,9 +305,13 @@ targets spelled through a variable."
 ;;; Entry point
 
 ;;;###autoload
-(defun makeel-run ()
-  "Pick a target from the dominating Makefile and run it."
-  (interactive)
+(defun makeel-run (&optional terminal)
+  "Pick a target from the dominating Makefile and run it.
+With prefix argument TERMINAL, use a terminal for full-screen programs."
+  (interactive (list (or current-prefix-arg
+                         (and transient-current-prefix
+                              (eq (oref transient-current-prefix command) 'makeel-menu)
+                              (oref transient-current-prefix scope)))))
   (let* ((dir (or (locate-dominating-file default-directory "Makefile")
                   (user-error "No Makefile found above %s"
                               (abbreviate-file-name default-directory))))
@@ -304,7 +322,7 @@ targets spelled through a variable."
          (target (completing-read "Make: " targets nil t))
          (project (file-name-base (directory-file-name dir)))
          (buf-name (format "*makeel-%s-%s*" project target)))
-    (makeel--spawn buf-name target project dir)))
+    (makeel--spawn buf-name target project dir terminal)))
 
 ;;;###autoload
 (defun makeel-switch-buffer ()
@@ -328,11 +346,13 @@ targets spelled through a variable."
 ;;; Transient
 
 ;;;###autoload (autoload 'makeel-menu "makeel" nil t)
-(transient-define-prefix makeel-menu ()
-  "Make commands."
+(transient-define-prefix makeel-menu (&optional terminal)
+  "Make commands.  With prefix argument TERMINAL, run targets in a terminal."
   [["Make"
     ("m" "Run target"       makeel-run)
-    ("b" "Switch buffer"    makeel-switch-buffer)]])
+    ("b" "Switch buffer"    makeel-switch-buffer)]]
+  (interactive "P")
+  (transient-setup 'makeel-menu nil nil :scope terminal))
 
 (provide 'makeel)
 

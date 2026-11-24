@@ -27,7 +27,10 @@ opens the output; mouse-3 removes the buffer after confirmation.
 (default 60 seconds; nil keeps them indefinitely).
 
 Execution uses a PTY through compilation/comint and supports ANSI colors.
-Full-screen terminal programs require a separate terminal. Targets are
+For a full-screen program such as a curses role picker, use
+`C-u M-x makeel-run`, or prefix the Makeel menu binding with `C-u` and press
+`m`. The target opens in an Emacs terminal, where arrow keys and Space go
+directly to the program. Terminal runs appear in the same status tracker. Targets are
 discovered from literal rules in Makefile; variable expansion, included
 Makefiles, and Make's complete grammar are outside this parser's scope.
 
