@@ -45,6 +45,11 @@ three
           (with-current-buffer buf
             (let ((proc (get-buffer-process buf))
                   (deadline (+ (float-time) 10)))
+              (let ((prompts 0))
+                (cl-letf (((symbol-function 'comint-watch-for-password-prompt)
+                           (lambda (_text) (cl-incf prompts))))
+                  (run-hook-with-args 'comint-output-filter-functions "[sudo] password for test: "))
+                (should (= prompts 1)))
               (should (process-tty-name proc))
               (process-send-string proc "hello\n")
               (while (and (process-live-p proc) (< (float-time) deadline))

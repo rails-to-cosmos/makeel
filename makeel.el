@@ -263,10 +263,7 @@ With TERMINAL, run in a character-mode terminal."
       (setq header-line-format (makeel--header "C-c C-c interrupt"))
       (unless terminal
         (local-set-key (kbd "C-c C-k") #'makeel-kill-process)
-        (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter nil t)
-        (add-hook 'comint-output-filter-functions #'ansi-color-process-output nil t)
-        (add-hook 'comint-output-filter-functions
-                  #'comint-watch-for-password-prompt nil t))
+        (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter nil t))
       (add-hook 'kill-buffer-hook #'makeel--unregister nil t)
       (makeel--register buf)
       (let* ((proc (get-buffer-process buf))
