@@ -26,7 +26,11 @@ opens the output; mouse-3 removes the buffer after confirmation.
 `makeel-mode-line-cleanup-delay` controls how long completed entries remain
 (default 60 seconds; nil keeps them indefinitely).
 
-Execution uses a PTY through compilation/comint and supports ANSI colors.
+The `bootstrap` target opens in a character-mode terminal automatically. Type
+the sudo password directly at its prompt in the Makeel buffer. Customize
+`makeel-terminal-targets` to use this behavior for other targets.
+
+Compilation buffers use a PTY through compilation/comint and support ANSI colors.
 For a full-screen program such as a curses role picker, use
 `C-u M-x makeel-run`, or prefix the Makeel menu binding with `C-u` and press
 `m`. The target opens in an Emacs terminal, where arrow keys and Space go

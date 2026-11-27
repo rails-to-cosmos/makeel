@@ -67,6 +67,11 @@
   :group 'tools
   :prefix "makeel-")
 
+(defcustom makeel-terminal-targets '("bootstrap")
+  "Make targets that read input directly in a character-mode terminal."
+  :type '(repeat string)
+  :group 'makeel)
+
 (defcustom makeel-mode-line-cleanup-delay 60
   "Seconds after completion before the mode-line entry auto-disappears.
 Nil disables auto-cleanup."
@@ -319,7 +324,7 @@ With prefix argument TERMINAL, use a terminal for full-screen programs."
          (target (completing-read "Make: " targets nil t))
          (project (file-name-base (directory-file-name dir)))
          (buf-name (format "*makeel-%s-%s*" project target)))
-    (makeel--spawn buf-name target project dir terminal)))
+    (makeel--spawn buf-name target project dir (or terminal (member target makeel-terminal-targets)))))
 
 ;;;###autoload
 (defun makeel-switch-buffer ()
